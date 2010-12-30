@@ -1,6 +1,6 @@
-[submodule "wp-filosofo-js-library"]
-	path = wp-filosofo-js-library
-	url = git-BrownToad@seed1.projectlocker.com:FilosofoJS.git
 [submodule "includes/wp-json-rpc-api"]
 	path = includes/wp-json-rpc-api
 	url = git-BrownToad@seed1.projectlocker.com:WP_JSON_RPC_API.git
+[submodule "includes/wp-filosofo-js-library"]
+	path = includes/wp-filosofo-js-library
+	url = git-BrownToad@seed1.projectlocker.com:FilosofoJS.git
