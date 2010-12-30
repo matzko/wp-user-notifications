@@ -1,0 +1,94 @@
+/*
+ * thanks to the knob buttons for the icons
+ * http://itweek.deviantart.com/art/Knob-Buttons-Toolbar-icons-73463960
+ */
+
+#wp-user-notification-wrap {
+	display:block;
+	position:fixed;
+	top:50px;
+	width:100%;
+}
+	#wp-user-notification-main {
+		margin:0 auto;
+		position:relative;
+		width:650px;
+	}
+
+	#user-notification-close-link {
+		font-family: sans-serif;
+		font-weight: bold;
+		position: absolute;
+		right: 10px;
+		text-decoration: none;
+		top: 5px;
+	}
+
+.wp-user-notification-info, 
+.wp-user-notification-success, 
+.wp-user-notification-warning, 
+.wp-user-notification-error, 
+.wp-user-notification-validation {
+	border: 1px solid;
+	font-family:Arial, Helvetica, sans-serif; 
+	font-size:13px;
+	margin: 10px 0px;
+	padding:25px 20px 25px 50px;
+	background-repeat: no-repeat;
+	background-position: 10px center;
+	-moz-box-shadow: 3px 3px 13px #666;
+	-webkit-box-shadow: 3px 3px 13px #666;
+	box-shadow: 3px 3px 13px #666;
+	-moz-border-radius: 4px;
+	-khtml-border-radius: 4px;
+	-webkit-border-top-left-radius: 4px;
+	-webkit-border-top-right-radius: 4px;
+	-webkit-border-bottom-left-radius: 4px;
+	-webkit-border-bottom-right-radius: 4px;
+	border-radius: 4px;
+}
+.wp-user-notification-info {
+	color: #00529B;
+	background-color: #BDE5F8;
+	background-image: url('../images/info.png');
+}
+	.wp-user-notification-info #user-notification-close-link {
+		color: #00529B;
+	}
+
+.wp-user-notification-success {
+	color: #4F8A10;
+	background-color: #DFF2BF;
+	background-image:url('../images/success.png');
+}
+	.wp-user-notification-success #user-notification-close-link {
+		color: #4F8A10;
+	}
+
+.wp-user-notification-warning {
+	color: #9F6000;
+	background-color: #FEEFB3;
+	background-image: url('../images/warning.png');
+}
+	.wp-user-notification-warning #user-notification-close-link {
+		color: #9F6000;
+	}
+
+.wp-user-notification-error {
+	color: #D8000C;
+	background-color: #FFBABA;
+	background-image: url('../images/error.png');
+}
+	.wp-user-notification-error #user-notification-close-link {
+		color: #D8000C;
+	}
+
+.wp-user-notification-validation {
+	color: #D63301;
+	background-color: #FFCCBA;
+	background-image: url('../images/validation.png');
+}
+	.wp-user-notification-validation #user-notification-close-link {
+		color: #D63301;
+	}
+
