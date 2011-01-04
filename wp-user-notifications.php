@@ -449,9 +449,13 @@ if ( ! function_exists( 'load_wp_user_notification_helper' ) ) {
 	{
 		global $wp_user_notification_helper;
 		$wp_user_notification_helper = new WP_User_Notification_Control;
+
+		load_wp_json_rpc_api();
+
 		include_once 'includes' . DIRECTORY_SEPARATOR . 'json-server-class.php';
 	}
 
 	add_action('plugins_loaded', 'load_wp_user_notification_helper');
+	remove_action('plugins_loaded', 'load_wp_json_rpc_api');
 }
 // eof
