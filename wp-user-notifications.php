@@ -161,6 +161,35 @@ if ( ! class_exists( 'WP_User_Notification_Control' ) ) {
 			}
 		}
 
+		protected function _get_current_notification_ids_by_unique_id( $unique_id = '' )
+		{
+			global $wpdb;
+			if ( empty( $unique_id ) ) {
+				return array();
+			}
+
+			$unique_id = mysql_real_escape_string( $unique_id, $wpdb->dbh );
+
+			$current_time = time();
+
+			$query = "	
+				SELECT ID FROM {$wpdb->posts} AS p 
+					LEFT JOIN {$wpdb->postmeta} AS user ON user.post_id = p.ID 
+					LEFT JOIN {$wpdb->postmeta} AS type ON type.post_id = p.ID 
+					JOIN {$wpdb->postmeta} AS exp ON exp.post_id = p.ID 
+				    
+					WHERE type.meta_key = 'notification-type' AND 
+					exp.meta_key = 'expiration-time' AND 
+					exp.meta_value > '{$current_time}' AND 
+					type.meta_value = 'user' AND 
+					user.meta_key = 'notification-unique-id' AND 
+					user.meta_value = '{$unique_id}'
+			";
+
+			return $wpdb->get_col( $query );
+
+		}
+
 		protected function _get_current_notification_ids_by_user( $user_id = 0 )
 		{
 			global $wpdb;
@@ -195,7 +224,12 @@ if ( ! class_exists( 'WP_User_Notification_Control' ) ) {
 		{
 			$notifications = array();
 			$user_id = get_current_user_id();
-			$ids = $this->_get_current_notification_ids_by_user( $user_id );
+
+			if ( empty( $user_id ) ) {
+				$ids = $this->_get_current_notification_ids_by_unique_id( $_COOKIE['wp-un-id'] );
+			} else {
+				$ids = $this->_get_current_notification_ids_by_user( $user_id );
+			}
 			$to_ignore = $this->get_hidden_user_notes( $user_id );
 
 			foreach( (array) $ids as $id ) {
@@ -229,6 +263,7 @@ if ( ! class_exists( 'WP_User_Notification_Control' ) ) {
 				$rec_type = get_post_meta( $id, 'notification-type', true );
 				$rec_cap = get_post_meta( $id, 'notification-cap', true );
 				$rec_user = get_post_meta( $id, 'notification-user', true );
+				$rec_id = get_post_meta( $id, 'notification-unique-id', true );
 				$exp = (int) get_post_meta( $id, 'expiration-time', true );
 
 				$notification->message_type = empty( $msg_type ) ? 'info' : $msg_type;
@@ -239,6 +274,7 @@ if ( ! class_exists( 'WP_User_Notification_Control' ) ) {
 
 				$notification->recipient_cap = empty( $rec_cap ) ? 'read' : $rec_cap;
 				$notification->recipient_user = (int) $rec_user;
+				$notification->unique_id = $rec_id;
 				if ( empty( $exp ) ) {
 					$exp = -1;
 				}
@@ -265,6 +301,7 @@ if ( ! class_exists( 'WP_User_Notification_Control' ) ) {
 				update_post_meta( $notification->id, 'notification-type', $notification->recipient_type );
 				update_post_meta( $notification->id, 'notification-cap', $notification->recipient_cap );
 				update_post_meta( $notification->id, 'notification-user', $notification->recipient_user );
+				update_post_meta( $notification->id, 'notification-unique-id', $notification->unique_id );
 				update_post_meta( $notification->id, 'expiration-time', $notification->get_expiration_time() );
 			}
 		}
@@ -350,6 +387,7 @@ if ( ! class_exists( 'WP_User_Notification_Control' ) ) {
 		public $recipient_cap = 'read';
 		public $recipient_type = 'capability'; // 'capability' or 'user'
 		public $recipient_user = 0;
+		public $unique_id; // a cookie identifying a non-logged-in user
 		
 		/**
 		 * Type of notification message.
@@ -442,6 +480,7 @@ if ( ! function_exists( 'load_wp_user_notification_helper' ) ) {
 		$note = new WP_User_Notification; 
 		$note->recipient_type = 'user';
 		$note->recipient_user = get_current_user_id();
+		$note->unique_id = $_COOKIE['wp-un-id'];
 		$note->message_type = in_array( $type, array( 
 			'error',
 			'info',
