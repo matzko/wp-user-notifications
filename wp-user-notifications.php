@@ -146,6 +146,19 @@ if ( ! class_exists( 'WP_User_Notification_Control' ) ) {
 				'rewrite' => false,
 				'query_var' => true,
 			) );
+
+			if ( ! headers_sent() ) {
+				$cookie_name = 'wp-un-id';
+				if ( empty( $_COOKIE[ $cookie_name ] ) ) {
+					$expire = time() + ( 60*60*24*2 );
+					$cookie_value = md5( $_SERVER['REMOTE_ADDR'] . uniqid() );
+
+					setcookie($cookie_name, $cookie_value, $expire, PLUGINS_COOKIE_PATH, COOKIE_DOMAIN );
+					setcookie($cookie_name, $cookie_value, $expire, ADMIN_COOKIE_PATH, COOKIE_DOMAIN );
+					setcookie($cookie_name, $cookie_value, $expire, COOKIE_PATH, COOKIE_DOMAIN );
+					setcookie($cookie_name, $cookie_value, $expire, SITECOOKIEPATH, COOKIE_DOMAIN );
+				}
+			}
 		}
 
 		protected function _get_current_notification_ids_by_user( $user_id = 0 )
@@ -157,10 +170,10 @@ if ( ! class_exists( 'WP_User_Notification_Control' ) ) {
 			$current_time = time();
 
 			$query = "	
-				SELECT ID FROM wp_posts AS p 
-					LEFT JOIN wp_postmeta AS user ON user.post_id = p.ID 
-					LEFT JOIN wp_postmeta AS type ON type.post_id = p.ID 
-					JOIN wp_postmeta AS exp ON exp.post_id = p.ID 
+				SELECT ID FROM {$wpdb->posts} AS p 
+					LEFT JOIN {$wpdb->postmeta} AS user ON user.post_id = p.ID 
+					LEFT JOIN {$wpdb->postmeta} AS type ON type.post_id = p.ID 
+					JOIN {$wpdb->postmeta} AS exp ON exp.post_id = p.ID 
 				    
 					WHERE type.meta_key = 'notification-type' AND 
 					exp.meta_key = 'expiration-time' AND 
