@@ -225,6 +225,7 @@ if ( ! class_exists( 'WP_User_Notification_Control' ) ) {
 			$notifications = array();
 			$user_id = get_current_user_id();
 
+			switch_to_blog( 1 );
 			if ( empty( $user_id ) ) {
 				$ids = $this->_get_current_notification_ids_by_unique_id( $_COOKIE['wp-un-id'] );
 			} else {
@@ -237,6 +238,7 @@ if ( ! class_exists( 'WP_User_Notification_Control' ) ) {
 					$notifications[] = $this->get_notification_by_id( $id );
 				}
 			}
+			restore_current_blog();
 
 			return $notifications;
 		}
@@ -287,6 +289,7 @@ if ( ! class_exists( 'WP_User_Notification_Control' ) ) {
 
 		public function save_notification( WP_User_Notification &$notification )
 		{
+			switch_to_blog( 1 );
 			if ( empty( $notification->id ) ) {
 				$_id = wp_insert_post( array(
 					'post_type' => 'wp-user-notification',
@@ -304,6 +307,8 @@ if ( ! class_exists( 'WP_User_Notification_Control' ) ) {
 				update_post_meta( $notification->id, 'notification-unique-id', $notification->unique_id );
 				update_post_meta( $notification->id, 'expiration-time', $notification->get_expiration_time() );
 			}
+
+			restore_current_blog();
 		}
 	}
 	
