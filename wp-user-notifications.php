@@ -2,7 +2,7 @@
 /*
 Plugin Name: User Notifications
 Version: 1.0
-Plugin URI:
+Plugin URI: http://austinmatzko.com/wordpress-plugins/wp-user-notifications/
 Description: An API and graphical elements for sending user notifications.
 Author: Austin Matzko
 Author URI: http://austinmatzko.com
