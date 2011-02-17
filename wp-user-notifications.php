@@ -246,7 +246,7 @@ if ( ! class_exists( 'WP_User_Notification_Control' ) ) {
 		public function delete_notification( WP_User_Notification $notification )
 		{
 			if ( empty( $notification->id ) ) {
-				$_post = get_post( $notificaton->id );
+				$_post = get_post( $notification->id );
 				if ( ! empty( $_post->post_type ) && 'wp-user-notification' == $_post->post_type ) {
 					return wp_delete_post( $notification->id, true );
 				}
