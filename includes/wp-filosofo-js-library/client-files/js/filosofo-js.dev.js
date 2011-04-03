@@ -3,10 +3,11 @@ var FilosofoJS = function(scope) {
 		if (obj.addEventListener)
 			obj.addEventListener(type, fn, false);
 		else if (obj.attachEvent)
-			obj.attachEvent('on' + type, function() { return fn.call(obj, window.event);});
+			obj.attachEvent('on' + type, function() { return fn.call(obj, w.event);});
 	},
 
 	d = document,
+	w = window,
 
 	XHR = (function() { 
 		var i, 
@@ -116,7 +117,7 @@ var FilosofoJS = function(scope) {
 	 * @return object The target object.
 	 */
 	getEventTarget = function(e) {
-		e = e || window.event;
+		e = e || w.event;
 		return e.target || e.srcElement;
 	},
 
@@ -207,8 +208,45 @@ var FilosofoJS = function(scope) {
 				}
 			}
 		}
-		console.log(data)
 		return data;	
+	},
+
+
+	/**
+	 * Create a cookie
+	 * @param name The name of the cookie
+	 * @param value The value of the cookie
+	 * @param days How many days the cookie will last
+	 */
+	setCookie = function( name, value, days ) {
+		var date = new Date(),
+		expires = '';
+
+		if ( days ) {
+			date.setTime( date.getTime() + ( days * 24 * 60 * 60 * 1000 ) );
+			expires = "; expires=" + ( date.toUTCString ? date.toUTCString() : date.toGMTString() );
+		}
+
+		d.cookie = name+"="+value+expires+"; path=/";
+	},
+
+	/**
+	 * Get a cookie's value
+	 * @param name The name of the cookie to get
+	 * @return string The value of the cookie
+	 */
+	getCookie = function( name ) {
+		var nameEQ = name + "=",
+		ca = d.cookie.split(';'),
+		i;
+
+		for(i = 0; i < ca.length; i++ ) {
+			while( ca[i].charAt(0) == ' ' ) 
+				ca[i] = ca[i].substring( 1, ca[i].length );
+			if (ca[i].indexOf( nameEQ ) == 0 ) 
+				return ca[i].substring( nameEQ.length, ca[i].length );
+		}
+		return null;
 	},
 
 
@@ -223,6 +261,15 @@ var FilosofoJS = function(scope) {
 		var i = lerp(start, end, value * value * ( 3 - 2 * value ));
 		return i;
 	},
+	
+	/*
+	berp = function( start, end, value ) {
+		value = 0 > value ? 0 : value;
+		value = 1 < value ? 1 : value;
+		value = ( Math.sin( value * Math.PI * (0.2 + 2.5 * value * value * value)) * Math.pow(1 - value, 2.2) + value) * (1 + (1.2 * (1 - value)));
+		return start + (end - start) * value;
+	},
+	/**/
 
 	inProgress = false,
 	/**
@@ -279,7 +326,7 @@ var FilosofoJS = function(scope) {
 		}
 	},
 
-	Animation = function(diff, callback) { 
+	Animation = function(diff, callback) {
 		return {
 			animate:function() {
 				if ( this.inProgress )
@@ -288,9 +335,7 @@ var FilosofoJS = function(scope) {
 					
 				callback = callback || function() {};
 
-				var rate = 20,
-				time = 500,
-				steps = time / rate,
+				var steps = this.time / this.rate,
 				i,
 				last = false,
 				state,
@@ -299,7 +344,7 @@ var FilosofoJS = function(scope) {
 
 				for ( i = 0; i < steps; i++ ) {
 					last = ( i + 1 ) < steps ? false : true;
-					state = 0 < diff ? hermite(0, 1, (i / steps)) * diff : hermite(1, 0, (i / steps)) * diff;
+					state = this.easing(0, 1, (i / steps)) * diff;
 					(function(cb) {
 						var k = i,
 						l = last,
@@ -308,10 +353,13 @@ var FilosofoJS = function(scope) {
 							if ( l )
 								that.inProgress = false;
 							cb.apply(that, [curDiff, l]);
-						}, k * rate);
+						}, k * that.rate);
 					})(callback);
 				}
-			}
+			},
+			easing:hermite,
+			rate:20,
+			time:500
 		}
 	},
 
@@ -331,25 +379,31 @@ var FilosofoJS = function(scope) {
 
 
 		var fadeCallback = function(curDiff, isLast) {
-			var o = 100 + curDiff * dir;
+			// var o = 100 + curDiff * dir;
+			var o = -1 === dir ? 100 + curDiff : curDiff;
 			obj.style.opacity = o / 100;
 			obj.style.filter = 'alpha(opacity=' + o + ')';
 			if ( isLast ) {
 				callback.call(obj);
-				if ( -1 === dir )
+				if ( -1 === dir ) {
+					obj.style.opacity = 0;
+					obj.style.filter = 'alpha(opacity=0)';
 					obj.style.display = 'none';
-				else	
+				} else {	
+					obj.style.opacity = 1;
+					obj.style.filter = 'alpha(opacity=100)';
 					obj.style.display = 'block';
+				}
 			}
 		},
 		animator;
 
 		if ( obj ) {
 			if ( -1 === dir ) {
-				animator = new Animation(100, fadeCallback),
+				animator = new Animation(-100, fadeCallback),
 				animator.animate();
 			} else {
-				animator = new Animation(-100, fadeCallback);
+				animator = new Animation(100, fadeCallback);
 				animator.animate();
 			}
 		}
@@ -419,7 +473,7 @@ var FilosofoJS = function(scope) {
 		if ( callback )
 			loadedCallback = callback;
 		addEvent(d, 'DOMContentLoaded', eventDOMLoaded );
-		addEvent(window, 'load', eventDOMLoaded );
+		addEvent(w, 'load', eventDOMLoaded );
 	},
 	
 	initialized = false,
@@ -439,10 +493,12 @@ var FilosofoJS = function(scope) {
 		attachClassClickListener:attachClassClickListener, 
 		doWhenReady:ready,
 		fade:fade,
+		getCookie:getCookie,
 		getEventTarget:getEventTarget,
 		getFormData:getFormData,
 		isObjProperty:isObjProp,
 		postReq:postReq,
-		scrollToElement:scrollToElement
+		scrollToElement:scrollToElement,
+		setCookie:setCookie
 	}
 }
