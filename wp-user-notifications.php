@@ -241,7 +241,10 @@ if ( ! class_exists( 'WP_User_Notification_Control' ) ) {
 					$notifications[] = $this->get_notification_by_id( $id );
 				}
 			}
-			restore_current_blog();
+			
+			if ( function_exists( 'restore_current_blog' ) ) {
+				restore_current_blog();
+			}
 
 			return $notifications;
 		}
@@ -314,7 +317,9 @@ if ( ! class_exists( 'WP_User_Notification_Control' ) ) {
 				update_post_meta( $notification->id, 'expiration-time', $notification->get_expiration_time() );
 			}
 
-			restore_current_blog();
+			if ( function_exists( 'restore_current_blog' ) ) {
+				restore_current_blog();
+			}
 		}
 	}
 	
